@@ -16,17 +16,12 @@ dependencies:
 
   # Dependency Injection
   get_it: ^8.0.2
-  injectable: ^2.5.0
 
-  # Local Database
-  isar: ^3.1.0+1
-  isar_flutter_libs: ^3.1.0+1
-
-  # Firebase
-  firebase_core: ^3.8.1
-  firebase_auth: ^5.3.4
-  cloud_firestore: ^5.5.1
-  firebase_messaging: ^15.1.6
+  # Firebase (comentado para demo - descomentar cuando configures Firebase)
+  # firebase_core: ^3.8.1
+  # firebase_auth: ^5.3.4
+  # cloud_firestore: ^5.5.1
+  # firebase_messaging: ^15.1.6
 
   # Networking
   dio: ^5.7.0
@@ -46,13 +41,9 @@ dependencies:
 
   # UI Components
   cupertino_icons: ^1.0.8
-  flutter_svg: ^2.0.16
-  cached_network_image: ^3.4.1
-  shimmer: ^3.0.0
-  lottie: ^3.2.0
 
-  # Notifications
-  flutter_local_notifications: ^18.0.1
+  # Local Storage (simple, sin Isar para demo)
+  sqflite: ^2.4.1
 
 dev_dependencies:
   flutter_test:
@@ -61,11 +52,6 @@ dev_dependencies:
   # Integration Testing
   integration_test:
     sdk: flutter
-
-  # Code Generation
-  build_runner: ^2.4.14
-  injectable_generator: ^2.6.2
-  isar_generator: ^3.1.0+1
 
   # Linting
   flutter_lints: ^5.0.0
@@ -81,19 +67,3 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/animations/
-
-  # TODO: Descarga las fuentes Poppins de Google Fonts y descomenta esta sección
-  # fonts:
-  #   - family: Poppins
-  #     fonts:
-  #       - asset: assets/fonts/Poppins-Light.ttf
-  #         weight: 300
-  #       - asset: assets/fonts/Poppins-Regular.ttf
-  #         weight: 400
-  #       - asset: assets/fonts/Poppins-Medium.ttf
-  #         weight: 500
-  #       - asset: assets/fonts/Poppins-SemiBold.ttf
-  #         weight: 600
-  #       - asset: assets/fonts/Poppins-Bold.ttf
-  #         weight: 700
-
