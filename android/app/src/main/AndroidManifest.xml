@@ -1,51 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Internet permissions for Firebase -->
+    <!-- Internet permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    
-    <!-- Foreground service permission -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
-    
-    <!-- CRITICAL: System Alert Window for overlay -->
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    
-    <!-- Query installed packages -->
-    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
-        tools:ignore="QueryAllPackagesPermission" />
-    
-    <!-- Usage stats for app monitoring -->
-    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
-        tools:ignore="ProtectedPermissions" />
-    
-    <!-- Receive boot completed for auto-start -->
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    
-    <!-- Vibration for haptic feedback -->
-    <uses-permission android:name="android.permission.VIBRATE" />
-    
-    <!-- Wake lock for background services -->
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    
-    <!-- FCM notifications -->
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    
-    <!-- Keystore access -->
-    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
-    <uses-permission android:name="android.permission.USE_FINGERPRINT" />
 
     <application
         android:label="EduTime"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher"
-        android:allowBackup="true"
-        android:supportsRtl="true"
-        android:theme="@style/LaunchTheme"
-        android:enableOnBackInvokedCallback="true"
-        tools:targetApi="tiramisu">
+        android:icon="@mipmap/ic_launcher">
         
         <!-- Main Activity -->
         <activity
@@ -64,78 +27,11 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
             
-            <!-- Deep links -->
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="edutime"/>
-            </intent-filter>
-        </activity>
-        
-        <!-- Accessibility Service for app monitoring -->
-        <service
-            android:name=".services.EduAccessibilityService"
-            android:exported="false"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
-            android:label="@string/accessibility_service_label"
-            android:description="@string/accessibility_service_description">
-            
-            <intent-filter>
-                <action android:name="android.accessibilityservice.AccessibilityService"/>
-            </intent-filter>
-            
             <meta-data
-                android:name="android.accessibilityservice"
-                android:resource="@xml/accessibility_service_config"/>
-        </service>
-        
-        <!-- Overlay Service for blocking UI -->
-        <service
-            android:name=".services.OverlayService"
-            android:exported="false"
-            android:foregroundServiceType="specialUse">
-            
-            <property
-                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="parental_control_overlay"/>
-        </service>
-        
-        <!-- Boot receiver for auto-start -->
-        <receiver
-            android:name=".receivers.BootReceiver"
-            android:exported="true"
-            android:enabled="true">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
-                <action android:name="android.intent.action.QUICKBOOT_POWERON"/>
-                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/>
-            </intent-filter>
-        </receiver>
-        
-        <!-- Firebase Cloud Messaging Service -->
-        <service
-            android:name="io.flutter.plugins.firebase.messaging.FlutterFirebaseMessagingService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
-            </intent-filter>
-        </service>
-        
-        <!-- FCM default notification channel -->
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_channel_id"
-            android:value="edutime_main"/>
-        
-        <!-- FCM default notification icon -->
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@drawable/ic_notification"/>
-        
-        <!-- FCM default notification color -->
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_color"
-            android:resource="@color/notification_color"/>
+              android:name="io.flutter.embedding.android.NormalTheme"
+              android:resource="@style/NormalTheme"
+              />
+        </activity>
         
         <!-- Flutter embedding -->
         <meta-data
@@ -143,13 +39,5 @@
             android:value="2"/>
             
     </application>
-    
-    <!-- Queries for package visibility (Android 11+) -->
-    <queries>
-        <!-- Query all apps for usage monitoring -->
-        <intent>
-            <action android:name="android.intent.action.MAIN"/>
-        </intent>
-    </queries>
     
 </manifest>

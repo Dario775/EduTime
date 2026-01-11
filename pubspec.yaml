@@ -10,47 +10,11 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # State Management
-  flutter_bloc: ^9.0.0
-  equatable: ^2.0.7
-
-  # Dependency Injection
-  get_it: ^8.0.2
-
-  # Firebase (comentado para demo - descomentar cuando configures Firebase)
-  # firebase_core: ^3.8.1
-  # firebase_auth: ^5.3.4
-  # cloud_firestore: ^5.5.1
-  # firebase_messaging: ^15.1.6
-
-  # Networking
-  dio: ^5.7.0
-  connectivity_plus: ^6.1.1
-
-  # Functional Programming
-  dartz: ^0.10.1
-
-  # Routing
-  go_router: ^14.6.3
-
-  # Utilities
-  intl: ^0.19.0
-  uuid: ^4.5.1
-  shared_preferences: ^2.3.4
-  path_provider: ^2.1.5
-
   # UI Components
   cupertino_icons: ^1.0.8
 
-  # Local Storage (simple, sin Isar para demo)
-  sqflite: ^2.4.1
-
 dev_dependencies:
   flutter_test:
-    sdk: flutter
-
-  # Integration Testing
-  integration_test:
     sdk: flutter
 
   # Linting

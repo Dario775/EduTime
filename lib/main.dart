@@ -1,55 +1,62 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'core/di/injection_container.dart' as di;
-import 'core/theme/app_theme.dart';
-import 'presentation/app/app_bloc_observer.dart';
-import 'presentation/router/app_router.dart';
-
-/// EduTime - Smart Educational Time Management
-/// 
-/// A Flutter application built with Clean Architecture principles
-/// for helping students manage their study time effectively.
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  // Set preferred orientations
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]);
-
-  // Initialize dependency injection
-  await di.init();
-
-  // Set up BLoC observer for debugging
-  Bloc.observer = AppBlocObserver();
-
+void main() {
   runApp(const EduTimeApp());
 }
 
-/// Root application widget
 class EduTimeApp extends StatelessWidget {
   const EduTimeApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
+    return MaterialApp(
       title: 'EduTime',
       debugShowCheckedModeBanner: false,
-      
-      // Theme Configuration
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
-      
-      // Routing
-      routerConfig: AppRouter.router,
-      
-      // Localization (to be implemented)
-      // localizationsDelegates: AppLocalizations.localizationsDelegates,
-      // supportedLocales: AppLocalizations.supportedLocales,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2563EB)),
+        useMaterial3: true,
+      ),
+      home: const HomePage(),
+    );
+  }
+}
+
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('EduTime'),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.access_time,
+              size: 100,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(height: 24),
+            Text(
+              '¡Bienvenido a EduTime!',
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            const SizedBox(height: 16),
+            const Padding(
+              padding: EdgeInsets.all(24.0),
+              child: Text(
+                'App de gestión de tiempo educativo\n'
+                'Estudia para ganar tiempo libre',
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
