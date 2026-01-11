@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../services/storage_service.dart';
+import '../models/study_category.dart';
 
 class TimerPage extends StatefulWidget {
   const TimerPage({super.key});
@@ -14,6 +15,7 @@ class _TimerPageState extends State<TimerPage> {
   bool _isRunning = false;
   int _seconds = 0;
   Timer? _timer;
+  StudyCategory? _selectedCategory;
 
   @override
   void dispose() {
@@ -63,8 +65,11 @@ class _TimerPageState extends State<TimerPage> {
 
     _pauseTimer();
 
-    // Save the study time
-    await storageService.addStudyTime(_seconds);
+    // Save the study time with category
+    await storageService.addStudyTime(
+      _seconds,
+      categoryId: _selectedCategory?.id,
+    );
 
     if (!mounted) return;
 
@@ -147,6 +152,122 @@ class _TimerPageState extends State<TimerPage> {
       body: SafeArea(
         child: Column(
           children: [
+            // Category Selector
+            if (_seconds == 0 && !_isRunning) ...[
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Categoría de estudio',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: 100,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: studyCategories.length,
+                        itemBuilder: (context, index) {
+                          final category = studyCategories[index];
+                          final isSelected = _selectedCategory?.id == category.id;
+                          
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 12),
+                            child: InkWell(
+                              onTap: () {
+                                setState(() {
+                                  _selectedCategory = category;
+                                });
+                              },
+                              borderRadius: BorderRadius.circular(16),
+                              child: Container(
+                                width: 90,
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? category.color
+                                      : category.color.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: category.color,
+                                    width: isSelected ? 3 : 1,
+                                  ),
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      category.icon,
+                                      color: isSelected
+                                          ? Colors.white
+                                          : category.color,
+                                      size: 32,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      category.name,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: isSelected
+                                            ? FontWeight.bold
+                                            : FontWeight.normal,
+                                        color: isSelected
+                                            ? Colors.white
+                                            : category.color,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ] else if (_selectedCategory != null) ...[
+              // Show selected category when timer is running
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: _selectedCategory!.color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: _selectedCategory!.color,
+                      width: 2,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        _selectedCategory!.icon,
+                        color: _selectedCategory!.color,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        _selectedCategory!.name,
+                        style: TextStyle(
+                          color: _selectedCategory!.color,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+            
             Expanded(
               child: Center(
                 child: Column(
