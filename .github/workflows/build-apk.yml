@@ -1,0 +1,84 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:  # Permite ejecutar manualmente
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.0'
+        channel: 'stable'
+        cache: true
+    
+    - name: Get dependencies
+      run: flutter pub get
+    
+    - name: Generate code (Isar)
+      run: dart run build_runner build --delete-conflicting-outputs
+      continue-on-error: true  # Continuar si hay errores menores
+    
+    - name: Build APK (Debug)
+      run: flutter build apk --debug
+    
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: edutime-debug-apk
+        path: build/app/outputs/flutter-apk/app-debug.apk
+        retention-days: 30
+
+  build-release:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'  # Solo manual
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.0'
+        channel: 'stable'
+        cache: true
+    
+    - name: Get dependencies
+      run: flutter pub get
+    
+    - name: Generate code (Isar)
+      run: dart run build_runner build --delete-conflicting-outputs
+      continue-on-error: true
+    
+    - name: Build Release APK
+      run: flutter build apk --release
+    
+    - name: Upload Release APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: edutime-release-apk
+        path: build/app/outputs/flutter-apk/app-release.apk
+        retention-days: 30

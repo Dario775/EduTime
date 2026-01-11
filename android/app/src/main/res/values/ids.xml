@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- View IDs for Overlay Service -->
+    <item name="tv_blocked_app" type="id"/>
+    <item name="tv_remaining_time" type="id"/>
+    <item name="btn_study" type="id"/>
+</resources>

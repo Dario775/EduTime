@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary brand color -->
+    <color name="primary">#2563EB</color>
+    <color name="primary_dark">#1D4ED8</color>
+    <color name="primary_light">#3B82F6</color>
+    
+    <!-- Accent colors -->
+    <color name="accent">#8B5CF6</color>
+    <color name="secondary">#6366F1</color>
+    
+    <!-- Status colors -->
+    <color name="success">#22C55E</color>
+    <color name="warning">#F59E0B</color>
+    <color name="error">#EF4444</color>
+    
+    <!-- Notification color -->
+    <color name="notification_color">#2563EB</color>
+    
+    <!-- Overlay colors -->
+    <color name="overlay_background">#E6000000</color>
+    <color name="overlay_card_background">#1AFFFFFF</color>
+    
+    <!-- Launcher icon background -->
+    <color name="ic_launcher_background">#2563EB</color>
+</resources>

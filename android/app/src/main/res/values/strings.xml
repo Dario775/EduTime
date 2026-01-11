@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">EduTime</string>
+    
+    <!-- Accessibility Service -->
+    <string name="accessibility_service_label">EduTime Monitor</string>
+    <string name="accessibility_service_description">
+        EduTime necesita acceso a la accesibilidad para monitorear el uso de apps 
+        y ayudar a gestionar el tiempo de pantalla de los niños. Este servicio 
+        detecta cuando se abren aplicaciones para aplicar los controles parentales 
+        configurados.
+    </string>
+    
+    <!-- Overlay messages -->
+    <string name="overlay_title">¡Tiempo Agotado!</string>
+    <string name="overlay_subtitle">No tienes tiempo libre disponible</string>
+    <string name="overlay_blocked_app">App bloqueada</string>
+    <string name="overlay_remaining_time">Tiempo restante</string>
+    <string name="overlay_study_button">¡Empezar a Estudiar!</string>
+    <string name="overlay_study_hint">Estudia para ganar más tiempo libre</string>
+    
+    <!-- Notifications -->
+    <string name="notification_monitoring_title">EduTime</string>
+    <string name="notification_monitoring_text">Monitoreando uso de apps</string>
+    <string name="notification_channel_name">EduTime Monitoring</string>
+    <string name="notification_channel_description">Notificaciones de monitoreo de apps</string>
+</resources>

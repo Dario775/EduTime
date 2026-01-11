@@ -1,0 +1,194 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ============================================================
+    // HELPER FUNCTIONS
+    // ============================================================
+    
+    // Check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Check if user owns this resource
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    // Get user document
+    function getUser(userId) {
+      return get(/databases/$(database)/documents/users/$(userId)).data;
+    }
+    
+    // Get family document
+    function getFamily(familyId) {
+      return get(/databases/$(database)/documents/families/$(familyId)).data;
+    }
+    
+    // Check if user is a parent
+    function isParent() {
+      let user = getUser(request.auth.uid);
+      return user.role == 'PARENT';
+    }
+    
+    // Check if user belongs to a family
+    function isFamilyMember(familyId) {
+      let family = getFamily(familyId);
+      return request.auth.uid in family.parentUids 
+          || request.auth.uid in family.childUids;
+    }
+    
+    // Check if user is a parent of this family
+    function isParentOfFamily(familyId) {
+      let family = getFamily(familyId);
+      return request.auth.uid in family.parentUids;
+    }
+    
+    // Check if user is owner or their parent
+    function isOwnerOrParent(userId) {
+      if (request.auth.uid == userId) return true;
+      let user = getUser(userId);
+      if (user.familyId == null) return false;
+      let family = getFamily(user.familyId);
+      return request.auth.uid in family.parentUids;
+    }
+    
+    // Check if user is a child in this family
+    function isChildInFamily(familyId) {
+      let family = getFamily(familyId);
+      return request.auth.uid in family.childUids;
+    }
+    
+    // ============================================================
+    // USER PROFILES
+    // ============================================================
+    
+    match /users/{userId} {
+      // Anyone authenticated can read their own profile
+      // Parents can read their children's profiles
+      allow read: if isAuthenticated() && isOwnerOrParent(userId);
+      
+      // Users can update their own profile (limited fields)
+      allow update: if isOwner(userId) 
+                    && !request.resource.data.diff(resource.data).changedKeys()
+                       .hasAny(['role', 'familyId', 'createdAt']);
+      
+      // Creation only via Cloud Functions (onUserCreate trigger)
+      allow create: if false;
+      
+      // Deletion only via Cloud Functions
+      allow delete: if false;
+      
+      // User's sessions subcollection
+      match /sessions/{sessionId} {
+        allow read: if isOwnerOrParent(userId);
+        allow write: if isOwner(userId);
+      }
+      
+      // User's subjects subcollection
+      match /subjects/{subjectId} {
+        allow read: if isOwnerOrParent(userId);
+        allow write: if isOwnerOrParent(userId);
+      }
+      
+      // User's goals subcollection
+      match /goals/{goalId} {
+        allow read: if isOwnerOrParent(userId);
+        allow write: if isOwnerOrParent(userId);
+      }
+      
+      // User's achievements subcollection
+      match /achievements/{achievementId} {
+        allow read: if isOwnerOrParent(userId);
+        allow write: if false; // Only via Cloud Functions
+      }
+    }
+    
+    // ============================================================
+    // FAMILIES
+    // ============================================================
+    
+    match /families/{familyId} {
+      // Family members can read family data
+      allow read: if isAuthenticated() && isFamilyMember(familyId);
+      
+      // Only parents can update family settings
+      allow update: if isParentOfFamily(familyId)
+                    && !request.resource.data.diff(resource.data).changedKeys()
+                       .hasAny(['id', 'ownerUid', 'createdAt']);
+      
+      // Creation only via Cloud Functions
+      allow create: if false;
+      
+      // Deletion only via Cloud Functions
+      allow delete: if false;
+    }
+    
+    // ============================================================
+    // WALLETS
+    // ============================================================
+    
+    match /wallets/{walletId} {
+      // Owner and parents can read wallet
+      allow read: if isAuthenticated() && isOwnerOrParent(walletId);
+      
+      // All wallet modifications via Cloud Functions only
+      allow write: if false;
+    }
+    
+    // ============================================================
+    // TRANSACTIONS
+    // ============================================================
+    
+    match /transactions/{transactionId} {
+      // Read if user owns the wallet or is parent
+      allow read: if isAuthenticated() 
+                  && (isOwner(resource.data.walletId) 
+                      || isOwnerOrParent(resource.data.walletId));
+      
+      // All transactions created via Cloud Functions
+      allow write: if false;
+    }
+    
+    // ============================================================
+    // STREAKS
+    // ============================================================
+    
+    match /streaks/{userId} {
+      allow read: if isAuthenticated() && isOwnerOrParent(userId);
+      
+      // Streak updates via Cloud Functions only
+      allow write: if false;
+    }
+    
+    // ============================================================
+    // RATE LIMITS (internal use)
+    // ============================================================
+    
+    match /rateLimits/{userId} {
+      // Only Cloud Functions can access
+      allow read, write: if false;
+    }
+    
+    // ============================================================
+    // PUSH NOTIFICATION TOKENS
+    // ============================================================
+    
+    match /fcmTokens/{tokenId} {
+      // Users can manage their own tokens
+      allow read, write: if isAuthenticated() 
+                         && request.auth.uid == resource.data.userId;
+    }
+    
+    // ============================================================
+    // APP CONFIGURATION (read-only)
+    // ============================================================
+    
+    match /config/{configId} {
+      allow read: if isAuthenticated();
+      allow write: if false;
+    }
+  }
+}
