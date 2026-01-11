@@ -3,6 +3,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../services/storage_service.dart';
+import '../models/study_category.dart';
 
 class StatsPage extends StatelessWidget {
   const StatsPage({super.key});
@@ -182,10 +183,157 @@ class StatsPage extends StatelessWidget {
           
           const SizedBox(height: 30),
           
+          // Category Distribution
+          _buildCategorySection(context),
+          
+          const SizedBox(height: 30),
+          
           // Stats Summary
           _buildSummaryCard(context),
         ],
       ),
+    );
+  }
+  
+  Widget _buildCategorySection(BuildContext context) {
+    final categoryStats = storageService.getCategoryStats();
+    
+    if (categoryStats.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          children: [
+            Icon(
+              Icons.category,
+              size: 48,
+              color: Colors.grey[400],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Sin categorías aún',
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Empieza a estudiar y selecciona categorías',
+              style: TextStyle(
+                color: Colors.grey[500],
+                fontSize: 12,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    }
+    
+    final total = categoryStats.values.fold<int>(0, (sum, val) => sum + val);
+    final sortedEntries = categoryStats.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Por Categoría',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 20),
+        
+        // Pie Chart
+        SizedBox(
+          height: 200,
+          child: Row(
+            children: [
+              // Chart
+              Expanded(
+                flex: 2,
+                child: PieChart(
+                  PieChartData(
+                    sectionsSpace: 2,
+                    centerSpaceRadius: 40,
+                    sections: sortedEntries.take(5).map((entry) {
+                      final category = getCategoryById(entry.key);
+                      if (category == null) return null;
+                      
+                      final percentage = (entry.value / total * 100).toInt();
+                      
+                      return PieChartSectionData(
+                        color: category.color,
+                        value: entry.value.toDouble(),
+                        title: '$percentage%',
+                        radius: 50,
+                        titleStyle: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      );
+                    }).whereType<PieChartSectionData>().toList(),
+                  ),
+                ),
+              ),
+              
+              const SizedBox(width: 20),
+              
+              // Legend
+              Expanded(
+                flex: 3,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: sortedEntries.take(5).map((entry) {
+                    final category = getCategoryById(entry.key);
+                    if (category == null) return const SizedBox.shrink();
+                    
+                    final minutes = entry.value ~/ 60;
+                    
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 16,
+                            height: 16,
+                            decoration: BoxDecoration(
+                              color: category.color,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              category.name,
+                              style: const TextStyle(fontSize: 13),
+                            ),
+                          ),
+                          Text(
+                            '$minutes min',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 

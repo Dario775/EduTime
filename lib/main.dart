@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import 'router/app_router.dart';
 import 'services/storage_service.dart';
+import 'services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize storage service
+  // Initialize services
   await storageService.init();
+  await notificationService.init();
+  
+  // Schedule daily reminder if enabled
+  if (notificationService.areNotificationsEnabled()) {
+    await notificationService.scheduleDailyReminder();
+  }
   
   runApp(const EduTimeApp());
 }
