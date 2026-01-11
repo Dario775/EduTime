@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import '../pages/home_page.dart';
 import '../pages/timer_page.dart';
 import '../pages/profile_page.dart';
+import '../pages/stats_page.dart';
+import '../pages/settings_page.dart';
 
 final router = GoRouter(
   initialLocation: '/',
@@ -21,6 +23,16 @@ final router = GoRouter(
       path: '/profile',
       name: 'profile',
       builder: (context, state) => const ProfilePage(),
+    ),
+    GoRoute(
+      path: '/stats',
+      name: 'stats',
+      builder: (context, state) => const StatsPage(),
+    ),
+    GoRoute(
+      path: '/settings',
+      name: 'settings',
+      builder: (context, state) => const SettingsPage(),
     ),
   ],
 );

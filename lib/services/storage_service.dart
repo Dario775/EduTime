@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StorageService {
@@ -6,6 +7,8 @@ class StorageService {
   static const String _keyCurrentStreak = 'current_streak';
   static const String _keyLastStudyDate = 'last_study_date';
   static const String _keyTodayStudyTime = 'today_study_time';
+  static const String _keyDailyGoal = 'daily_goal'; // in minutes
+  static const String _keyHistory = 'study_history'; // JSON of daily data
   
   late SharedPreferences _prefs;
   
@@ -18,12 +21,52 @@ class StorageService {
   int getTotalStudyTime() => _prefs.getInt(_keyTotalStudyTime) ?? 0;
   int getTotalCredits() => _prefs.getInt(_keyTotalCredits) ?? 0;
   int getCurrentStreak() => _prefs.getInt(_keyCurrentStreak) ?? 0;
+  int getDailyGoal() => _prefs.getInt(_keyDailyGoal) ?? 30; // Default: 30 min
+  
   int getTodayStudyTime() {
     _checkAndResetToday();
     return _prefs.getInt(_keyTodayStudyTime) ?? 0;
   }
   
+  // History: Map<date_string, seconds_studied>
+  Map<String, int> getHistory() {
+    final jsonString = _prefs.getString(_keyHistory);
+    if (jsonString == null) return {};
+    
+    try {
+      final Map<String, dynamic> decoded = json.decode(jsonString);
+      return decoded.map((key, value) => MapEntry(key, value as int));
+    } catch (e) {
+      return {};
+    }
+  }
+  
+  List<Map<String, dynamic>> getLast7Days() {
+    final history = getHistory();
+    final now = DateTime.now();
+    final result = <Map<String, dynamic>>[];
+    
+    for (int i = 6; i >= 0; i--) {
+      final date = now.subtract(Duration(days: i));
+      final dateKey = _dateKey(date);
+      final seconds = history[dateKey] ?? 0;
+      
+      result.add({
+        'date': date,
+        'dateKey': dateKey,
+        'seconds': seconds,
+        'minutes': seconds ~/ 60,
+      });
+    }
+    
+    return result;
+  }
+  
   // Setters
+  Future<void> setDailyGoal(int minutes) async {
+    await _prefs.setInt(_keyDailyGoal, minutes);
+  }
+  
   Future<void> addStudyTime(int seconds) async {
     final total = getTotalStudyTime() + seconds;
     final today = getTodayStudyTime() + seconds;
@@ -34,13 +77,37 @@ class StorageService {
     await _prefs.setInt(_keyTotalCredits, credits);
     await _prefs.setString(_keyLastStudyDate, DateTime.now().toIso8601String());
     
+    // Update history
+    await _updateHistory(today);
+    
     _checkAndUpdateStreak();
+  }
+  
+  Future<void> _updateHistory(int todaySeconds) async {
+    final history = getHistory();
+    final dateKey = _dateKey(DateTime.now());
+    history[dateKey] = todaySeconds;
+    
+    // Keep only last 30 days to save space
+    if (history.length > 30) {
+      final sortedKeys = history.keys.toList()..sort();
+      while (history.length > 30) {
+        history.remove(sortedKeys.first);
+        sortedKeys.removeAt(0);
+      }
+    }
+    
+    await _prefs.setString(_keyHistory, json.encode(history));
   }
   
   Future<void> spendCredits(int seconds) async {
     final current = getTotalCredits();
     final newCredits = (current - seconds).clamp(0, double.infinity).toInt();
     await _prefs.setInt(_keyTotalCredits, newCredits);
+  }
+  
+  String _dateKey(DateTime date) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
   
   void _checkAndResetToday() {

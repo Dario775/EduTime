@@ -177,6 +177,15 @@ class ProfilePage extends StatelessWidget {
           
           _buildSettingTile(
             context,
+            'Configurar Meta',
+            Icons.flag,
+            () => context.push('/settings'),
+          ),
+          
+          const SizedBox(height: 8),
+          
+          _buildSettingTile(
+            context,
             'Reiniciar Datos',
             Icons.restore,
             () async {

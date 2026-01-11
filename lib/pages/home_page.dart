@@ -68,12 +68,23 @@ class _HomePageState extends State<HomePage> {
                         color: Colors.white,
                       ),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.person, color: Colors.white),
-                      onPressed: () async {
-                        await context.push('/profile');
-                        setState(() {}); // Refresh when coming back
-                      },
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.bar_chart, color: Colors.white),
+                          onPressed: () async {
+                            await context.push('/stats');
+                            setState(() {}); // Refresh when coming back
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.person, color: Colors.white),
+                          onPressed: () async {
+                            await context.push('/profile');
+                            setState(() {}); // Refresh when coming back
+                          },
+                        ),
+                      ],
                     ),
                   ],
                 ),
