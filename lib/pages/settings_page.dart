@@ -15,7 +15,7 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
-    _daily Goal = storageService.getDailyGoal();
+    _dailyGoal = storageService.getDailyGoal();
   }
 
   Future<void> _saveDailyGoal(int minutes) async {
