@@ -1,11 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../services/storage_service.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
+  String _formatTime(int seconds) {
+    if (seconds < 60) {
+      return '$seconds seg';
+    }
+    
+    final minutes = seconds ~/ 60;
+    if (minutes < 60) {
+      return '$minutes min';
+    }
+    
+    final hours = minutes ~/ 60;
+    final remainingMins = minutes % 60;
+    
+    if (hours < 24) {
+      if (remainingMins == 0) {
+        return '$hours h';
+      }
+      return '$hours h $remainingMins m';
+    }
+    
+    final days = hours ~/ 24;
+    final remainingHours = hours % 24;
+    if (remainingHours == 0) {
+      return '$days días';
+    }
+    return '$days d $remainingHours h';
+  }
+
   @override
   Widget build(BuildContext context) {
+    final totalTime = storageService.getTotalStudyTime();
+    final credits = storageService.getTotalCredits();
+    final streak = storageService.getCurrentStreak();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mi Perfil'),
@@ -40,7 +73,9 @@ class ProfilePage extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Miembro desde hoy',
+                  totalTime > 0 
+                      ? 'Total: ${_formatTime(totalTime)} estudiados'
+                      : 'Comenzá tu primera sesión',
                   style: TextStyle(
                     color: Colors.grey[600],
                   ),
@@ -55,7 +90,7 @@ class ProfilePage extends StatelessWidget {
           _buildStatCard(
             context,
             'Tiempo Estudiado',
-            '0 horas',
+            _formatTime(totalTime),
             Icons.school,
             Colors.blue,
           ),
@@ -64,8 +99,8 @@ class ProfilePage extends StatelessWidget {
           
           _buildStatCard(
             context,
-            'Créditos Ganados',
-            '0 minutos',
+            'Créditos Disponibles',
+            _formatTime(credits),
             Icons.star,
             Colors.amber,
           ),
@@ -75,12 +110,59 @@ class ProfilePage extends StatelessWidget {
           _buildStatCard(
             context,
             'Racha Actual',
-            '0 días',
+            '$streak ${streak == 1 ? "día" : "días"}',
             Icons.local_fire_department,
             Colors.orange,
           ),
           
           const SizedBox(height: 40),
+          
+          // Info Card
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.green.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Colors.green.withOpacity(0.3),
+                width: 2,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.tips_and_updates,
+                      color: Colors.green[700],
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '¿Cómo funciona?',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green[900],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  '• Por cada minuto que estudias, ganan 1 minuto de crédito\n'
+                  '• Usa tus créditos para tiempo libre\n'
+                  '• Mantén tu racha estudiando cada día',
+                  style: TextStyle(
+                    color: Colors.green[900],
+                    height: 1.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          const SizedBox(height: 30),
           
           // Settings Section
           const Text(
@@ -95,23 +177,66 @@ class ProfilePage extends StatelessWidget {
           
           _buildSettingTile(
             context,
-            'Notificaciones',
-            Icons.notifications,
-            () {},
+            'Reiniciar Datos',
+            Icons.restore,
+            () async {
+              final result = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('⚠️ Confirmar'),
+                  content: const Text(
+                    '¿Estás seguro? Esto borrará todas tus estadísticas.',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: const Text('Cancelar'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.red,
+                      ),
+                      child: const Text('Borrar'),
+                    ),
+                  ],
+                ),
+              );
+
+              if (result == true) {
+                await storageService.reset();
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Datos reiniciados'),
+                    ),
+                  );
+                  context.pop();
+                }
+              }
+            },
           ),
+          
+          const SizedBox(height: 8),
           
           _buildSettingTile(
             context,
-            'Tema',
-            Icons.palette,
-            () {},
-          ),
-          
-          _buildSettingTile(
-            context,
-            'Acerca de',
+            'Acerca de EduTime',
             Icons.info,
-            () {},
+            () {
+              showAboutDialog(
+                context: context,
+                applicationName: 'EduTime',
+                applicationVersion: '1.0.0',
+                applicationIcon: const Icon(Icons.access_time, size: 48),
+                children: [
+                  const Text(
+                    'App de gestión de tiempo educativo.\n\n'
+                    'Estudia para ganar tiempo libre.',
+                  ),
+                ],
+              );
+            },
           ),
         ],
       ),

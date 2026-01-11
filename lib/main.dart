@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 import 'router/app_router.dart';
+import 'services/storage_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize storage service
+  await storageService.init();
+  
   runApp(const EduTimeApp());
 }
 

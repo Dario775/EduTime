@@ -13,6 +13,9 @@ dependencies:
   # Navigation
   go_router: ^14.6.3
 
+  # Local Storage
+  shared_preferences: ^2.3.4
+
   # UI Components
   cupertino_icons: ^1.0.8
 

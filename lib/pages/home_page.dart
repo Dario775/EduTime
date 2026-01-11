@@ -1,11 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../services/storage_service.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+    _loadStats();
+  }
+
+  Future<void> _loadStats() async {
+    setState(() {});
+  }
+
+  String _formatMinutes(int seconds) {
+    final minutes = seconds ~/ 60;
+    if (minutes < 60) {
+      return '$minutes min';
+    }
+    final hours = minutes ~/ 60;
+    final remainingMins = minutes % 60;
+    if (remainingMins == 0) {
+      return '$hours h';
+    }
+    return '$hours h $remainingMins m';
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final todaySeconds = storageService.getTodayStudyTime();
+    final streak = storageService.getCurrentStreak();
+    final credits = storageService.getTotalCredits();
+
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -37,7 +70,10 @@ class HomePage extends StatelessWidget {
                     ),
                     IconButton(
                       icon: const Icon(Icons.person, color: Colors.white),
-                      onPressed: () => context.push('/profile'),
+                      onPressed: () async {
+                        await context.push('/profile');
+                        setState(() {}); // Refresh when coming back
+                      },
                     ),
                   ],
                 ),
@@ -96,7 +132,10 @@ class HomePage extends StatelessWidget {
                       
                       // Start Button
                       ElevatedButton(
-                        onPressed: () => context.push('/timer'),
+                        onPressed: () async {
+                          await context.push('/timer');
+                          setState(() {}); // Refresh when coming back
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
                           foregroundColor: Theme.of(context).colorScheme.primary,
@@ -129,7 +168,7 @@ class HomePage extends StatelessWidget {
                 ),
               ),
               
-              // Bottom Stats (placeholder)
+              // Bottom Stats
               Container(
                 margin: const EdgeInsets.all(20),
                 padding: const EdgeInsets.all(20),
@@ -140,19 +179,19 @@ class HomePage extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _buildStat('Hoy', '0 min', Icons.today),
+                    _buildStat('Hoy', _formatMinutes(todaySeconds), Icons.today),
                     Container(
                       width: 1,
                       height: 40,
                       color: Colors.white.withOpacity(0.3),
                     ),
-                    _buildStat('Racha', '0 días', Icons.local_fire_department),
+                    _buildStat('Racha', '$streak días', Icons.local_fire_department),
                     Container(
                       width: 1,
                       height: 40,
                       color: Colors.white.withOpacity(0.3),
                     ),
-                    _buildStat('Créditos', '0 min', Icons.star),
+                    _buildStat('Créditos', _formatMinutes(credits), Icons.star),
                   ],
                 ),
               ),
