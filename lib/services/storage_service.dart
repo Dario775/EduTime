@@ -67,7 +67,7 @@ class StorageService {
     await _prefs.setInt(_keyDailyGoal, minutes);
   }
   
-  Future<void> addStudyTime(int seconds) async {
+  Future<void> addStudyTime(int seconds, {String? categoryId}) async {
     final total = getTotalStudyTime() + seconds;
     final today = getTodayStudyTime() + seconds;
     final credits = getTotalCredits() + seconds; // 1:1 ratio
@@ -80,7 +80,31 @@ class StorageService {
     // Update history
     await _updateHistory(today);
     
+    // Update category stats if provided
+    if (categoryId != null) {
+      await _updateCategoryStats(categoryId, seconds);
+    }
+    
     _checkAndUpdateStreak();
+  }
+  
+  Future<void> _updateCategoryStats(String categoryId, int seconds) async {
+    final key = 'category_$categoryId';
+    final current = _prefs.getInt(key) ?? 0;
+    await _prefs.setInt(key, current + seconds);
+  }
+  
+  Map<String, int> getCategoryStats() {
+    final allKeys = _prefs.getKeys();
+    final categoryKeys = allKeys.where((k) => k.startsWith('category_'));
+    
+    final Map<String, int> stats = {};
+    for (final key in categoryKeys) {
+      final categoryId = key.replaceFirst('category_', '');
+      stats[categoryId] = _prefs.getInt(key) ?? 0;
+    }
+    
+    return stats;
   }
   
   Future<void> _updateHistory(int todaySeconds) async {

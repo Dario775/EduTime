@@ -16,6 +16,9 @@ dependencies:
   # Local Storage
   shared_preferences: ^2.3.4
 
+  # Notifications
+  flutter_local_notifications: ^18.0.1
+
   # Charts
   fl_chart: ^0.69.2
 
