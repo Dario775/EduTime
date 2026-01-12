@@ -196,6 +196,51 @@ class AuthService {
     }
   }
 
+  // --- Parenting / Linking Logic (Mock) ---
+  
+  // In-memory storage for pairing codes (Code -> UserID)
+  final Map<String, String> _activeConnectionCodes = {};
+
+  // Generate a 6-digit code for the current user (Parent)
+  Future<String> generateConnectionCode() async {
+    final user = _currentUser;
+    if (user == null) throw Exception('No user logged in');
+    
+    // Generate simple 6-digit code
+    final code = (100000 + DateTime.now().millisecondsSinceEpoch % 900000).toString();
+    
+    // Store in memory (valid for this session)
+    _activeConnectionCodes[code] = user.uid;
+    
+    return code;
+  }
+
+  // Connect using a code (Child enters Parent's code)
+  Future<String?> connectWithCode(String code) async {
+    try {
+      final parentId = _activeConnectionCodes[code];
+      
+      if (parentId == null) {
+        return 'Código inválido o expirado';
+      }
+
+      final childId = _currentUser?.uid;
+      if (childId == null) return 'No hay usuario activo';
+
+      // Perform the linking
+      final error = await linkChildToParent(childId: childId, parentId: parentId);
+      
+      if (error == null) {
+        // Consume code (optional, keep it if multiple children need to join)
+        // _activeConnectionCodes.remove(code); 
+      }
+      
+      return error;
+    } catch (e) {
+      return 'Error al conectar: $e';
+    }
+  }
+
   // Get children of a parent
   Future<List<AppUser>> getChildren(String parentId) async {
     try {
