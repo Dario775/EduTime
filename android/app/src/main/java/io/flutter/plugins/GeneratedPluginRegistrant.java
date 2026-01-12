@@ -30,5 +30,10 @@ public final class GeneratedPluginRegistrant {
     } catch (Exception e) {
       Log.e(TAG, "Error registering plugin shared_preferences_android, io.flutter.plugins.sharedpreferences.SharedPreferencesPlugin", e);
     }
+    try {
+      flutterEngine.getPlugins().add(new io.github.parassharmaa.usage_stats.UsageStatsPlugin());
+    } catch (Exception e) {
+      Log.e(TAG, "Error registering plugin usage_stats, io.github.parassharmaa.usage_stats.UsageStatsPlugin", e);
+    }
   }
 }
