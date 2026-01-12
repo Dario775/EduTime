@@ -11,6 +11,7 @@ import '../pages/parent/parent_dashboard.dart';
 import '../pages/child/child_dashboard.dart';
 import '../services/auth_service.dart';
 import '../models/user_model.dart';
+import '../models/task_model.dart';
 
 final router = GoRouter(
   initialLocation: '/login', // Start at login
