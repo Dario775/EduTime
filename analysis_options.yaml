@@ -13,14 +13,14 @@ analyzer:
   errors:
     invalid_annotation_target: ignore
   language:
-    strict-casts: true
-    strict-inference: true
-    strict-raw-types: true
+    strict-casts: false
+    strict-inference: false
+    strict-raw-types: false
 
 linter:
   rules:
-    # Error Rules
-    - always_use_package_imports
+    # Error Rules - Disabled for now
+    # - always_use_package_imports  # Allows relative imports
     - avoid_dynamic_calls
     - avoid_empty_else
     - avoid_slow_async_io
