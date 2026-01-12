@@ -8,6 +8,7 @@ import '../pages/auth/login_page.dart';
 import '../pages/auth/register_page.dart';
 import '../pages/parent/parent_dashboard.dart';
 import '../pages/child/child_dashboard.dart';
+import '../pages/child/free_time_page.dart';
 import '../services/auth_service.dart';
 import '../models/user_model.dart';
 import '../models/task_model.dart';
@@ -79,6 +80,11 @@ final router = GoRouter(
       path: '/child-dashboard',
       name: 'child-dashboard',
       builder: (context, state) => const ChildDashboard(),
+    ),
+    GoRoute(
+      path: '/free-time',
+      name: 'free-time',
+      builder: (context, state) => const FreeTimePage(),
     ),
   ],
 );

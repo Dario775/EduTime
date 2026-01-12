@@ -155,22 +155,59 @@ class _ChildDashboardState extends State<ChildDashboard> {
                     ),
                   ],
                 ),
-                child: Row(
+                child: Column(
                   children: [
-                    const Icon(Icons.videogame_asset, color: Colors.white, size: 40),
-                    const SizedBox(width: 20),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    Row(
                       children: [
-                        const Text(
-                          'TIEMPO LIBRE GANADO',
-                          style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          '${storageService.getTotalCredits() ~/ 60} minutos',
-                          style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+                        const Icon(Icons.videogame_asset, color: Colors.white, size: 40),
+                        const SizedBox(width: 20),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'TIEMPO LIBRE GANADO',
+                                style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                '${storageService.getTotalCredits() ~/ 60} minutos',
+                                style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: storageService.getTotalCredits() > 0
+                            ? () => context.push('/free-time')
+                            : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.purple[700],
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.play_circle_filled, size: 24),
+                            SizedBox(width: 8),
+                            Text(
+                              'Usar Tiempo Libre',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ],
                 ),
