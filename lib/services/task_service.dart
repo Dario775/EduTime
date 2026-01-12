@@ -68,6 +68,33 @@ class TaskService {
     tasks.removeWhere((t) => t.id == taskId);
     await _saveAllTasks(tasks);
   }
+
+  // Get statistics for a child
+  Future<Map<String, dynamic>> getChildStatistics(String childId) async {
+    final tasks = await getTasksForChild(childId);
+    
+    final completedTasks = tasks.where((t) => t.status == TaskStatus.completed).toList();
+    final pendingTasks = tasks.where((t) => t.status == TaskStatus.pending).toList();
+    
+    final totalStudyMinutes = completedTasks.fold<int>(
+      0,
+      (sum, task) => sum + task.durationMinutes,
+    );
+    
+    final totalRewardMinutes = completedTasks.fold<int>(
+      0,
+      (sum, task) => sum + task.rewardMinutes,
+    );
+    
+    return {
+      'totalTasks': tasks.length,
+      'completedTasks': completedTasks.length,
+      'pendingTasks': pendingTasks.length,
+      'totalStudyMinutes': totalStudyMinutes,
+      'totalRewardMinutes': totalRewardMinutes,
+      'completionRate': tasks.isEmpty ? 0.0 : (completedTasks.length / tasks.length) * 100,
+    };
+  }
 }
 
 // Global instance

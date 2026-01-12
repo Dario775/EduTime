@@ -163,6 +163,11 @@ class _ParentDashboardState extends State<ParentDashboard> {
 
                   const SizedBox(height: 24),
 
+                  // Overall Statistics
+                  if (_children.isNotEmpty) _buildOverallStatistics(),
+
+                  const SizedBox(height: 24),
+
                   // Children Section with Add Button
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -357,6 +362,137 @@ class _ParentDashboardState extends State<ParentDashboard> {
         ),
       ),
     );
+  }
+
+  Widget _buildOverallStatistics() {
+    return FutureBuilder<Map<String, int>>(
+      future: _calculateOverallStats(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final stats = snapshot.data!;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Estadísticas Generales',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildStatCard(
+                    icon: Icons.assignment,
+                    title: 'Tareas Totales',
+                    value: '${stats['totalTasks']}',
+                    color: Colors.blue,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildStatCard(
+                    icon: Icons.check_circle,
+                    title: 'Completadas',
+                    value: '${stats['completedTasks']}',
+                    color: Colors.green,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildStatCard(
+                    icon: Icons.schedule,
+                    title: 'Tiempo Estudiado',
+                    value: '${stats['totalStudyMinutes']} min',
+                    color: Colors.orange,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildStatCard(
+                    icon: Icons.star,
+                    title: 'Créditos Ganados',
+                    value: '${stats['totalRewardMinutes']} min',
+                    color: Colors.purple,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildStatCard({
+    required IconData icon,
+    required String title,
+    required String value,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: color, size: 28),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Colors.grey,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<Map<String, int>> _calculateOverallStats() async {
+    int totalTasks = 0;
+    int completedTasks = 0;
+    int totalStudyMinutes = 0;
+    int totalRewardMinutes = 0;
+
+    for (final child in _children) {
+      final stats = await taskService.getChildStatistics(child.uid);
+      totalTasks += stats['totalTasks'] as int;
+      completedTasks += stats['completedTasks'] as int;
+      totalStudyMinutes += stats['totalStudyMinutes'] as int;
+      totalRewardMinutes += stats['totalRewardMinutes'] as int;
+    }
+
+    return {
+      'totalTasks': totalTasks,
+      'completedTasks': completedTasks,
+      'totalStudyMinutes': totalStudyMinutes,
+      'totalRewardMinutes': totalRewardMinutes,
+    };
   }
 
   Widget _buildEmptyState() {
