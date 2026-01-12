@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'router/app_router.dart';
 import 'services/storage_service.dart';
 import 'services/notification_service.dart';
+import 'services/auth_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -9,6 +10,7 @@ void main() async {
   // Initialize services
   await storageService.init();
   await notificationService.init();
+  await authService.init(); // Initialize Auth
   
   // Schedule daily reminder if enabled
   if (notificationService.areNotificationsEnabled()) {
