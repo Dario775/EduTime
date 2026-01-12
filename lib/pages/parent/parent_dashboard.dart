@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/services.dart';
 import '../../services/auth_service.dart';
+import '../../services/task_service.dart';
 import '../../models/user_model.dart';
+import '../../models/task_model.dart';
 
 class ParentDashboard extends StatefulWidget {
   const ParentDashboard({super.key});
@@ -199,9 +201,19 @@ class _ParentDashboardState extends State<ParentDashboard> {
                             ),
                             title: Text(child.name),
                             subtitle: Text(child.email),
-                            trailing: const Icon(Icons.chevron_right),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.add_task),
+                                  onPressed: () => _showCreateTaskDialog(child),
+                                  tooltip: 'Asignar Tarea',
+                                ),
+                                const Icon(Icons.chevron_right),
+                              ],
+                            ),
                             onTap: () {
-                              // TODO: Navigate to child details/tasks
+                              _showChildTasks(child);
                             },
                           ),
                         );
@@ -210,6 +222,140 @@ class _ParentDashboardState extends State<ParentDashboard> {
                 ],
               ),
             ),
+    );
+  }
+
+  Future<void> _showCreateTaskDialog(AppUser child) async {
+    final titleController = TextEditingController();
+    final durationController = TextEditingController();
+    final rewardController = TextEditingController();
+
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Tarea para ${child.name}'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: titleController,
+              decoration: const InputDecoration(
+                labelText: 'Materia / Título',
+                hintText: 'Ej: Matemáticas, Lectura',
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: durationController,
+              decoration: const InputDecoration(
+                labelText: 'Duración (minutos)',
+                suffixText: 'min',
+              ),
+              keyboardType: TextInputType.number,
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: rewardController,
+              decoration: const InputDecoration(
+                labelText: 'Recompensa (tiempo libre)',
+                suffixText: 'min',
+                helperText: 'Minutos de ocio regalados al terminar',
+              ),
+              keyboardType: TextInputType.number,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (titleController.text.isEmpty || durationController.text.isEmpty) return;
+
+              final task = StudyTask(
+                id: DateTime.now().millisecondsSinceEpoch.toString(),
+                title: titleController.text,
+                durationMinutes: int.tryParse(durationController.text) ?? 30,
+                parentId: authService.currentUser!.uid,
+                childId: child.uid,
+                createdAt: DateTime.now(),
+                rewardMinutes: int.tryParse(rewardController.text) ?? 0,
+              );
+
+              await taskService.createTask(task);
+              if (mounted) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Tarea asignada exitosamente')),
+                );
+              }
+            },
+            child: const Text('Asignar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showChildTasks(AppUser child) async {
+    final tasks = await taskService.getTasksForChild(child.uid);
+    
+    if (!mounted) return;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        maxChildSize: 0.9,
+        expand: false,
+        builder: (context, scrollController) => Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                'Tareas de ${child.name}',
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+            ),
+            if (tasks.isEmpty)
+              const Expanded(child: Center(child: Text('No hay tareas asignadas')))
+            else
+              Expanded(
+                child: ListView.builder(
+                  controller: scrollController,
+                  itemCount: tasks.length,
+                  itemBuilder: (context, index) {
+                    final task = tasks[index];
+                    return ListTile(
+                      leading: Icon(
+                        task.status == TaskStatus.completed
+                            ? Icons.check_circle
+                            : Icons.pending_actions,
+                        color: task.status == TaskStatus.completed ? Colors.green : Colors.orange,
+                      ),
+                      title: Text(task.title),
+                      subtitle: Text('${task.durationMinutes} min • Recompensa: ${task.rewardMinutes} min'),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete_outline, color: Colors.red),
+                        onPressed: () async {
+                          await taskService.deleteTask(task.id);
+                          Navigator.pop(context);
+                          _showChildTasks(child); // Reload
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 

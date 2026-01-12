@@ -2,10 +2,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../services/storage_service.dart';
+import '../services/task_service.dart';
 import '../models/study_category.dart';
+import '../models/task_model.dart';
 
 class TimerPage extends StatefulWidget {
-  const TimerPage({super.key});
+  final StudyTask? task;
+  const TimerPage({super.key, this.task});
 
   @override
   State<TimerPage> createState() => _TimerPageState();
@@ -16,6 +19,12 @@ class _TimerPageState extends State<TimerPage> {
   int _seconds = 0;
   Timer? _timer;
   StudyCategory? _selectedCategory;
+
+  @override
+  void initState() {
+    super.initState();
+    // If it's a task, maybe we want to preset something
+  }
 
   @override
   void dispose() {
@@ -65,23 +74,42 @@ class _TimerPageState extends State<TimerPage> {
 
     _pauseTimer();
 
-    // Save the study time with category
+    // 1. Save standard study time (1:1 credits)
     await storageService.addStudyTime(
       _seconds,
       categoryId: _selectedCategory?.id,
     );
 
+    // 2. Handle Task Completion
+    int bonusCredits = 0;
+    if (widget.task != null) {
+      // Check if they studied at least 80% of the duration to count as completed
+      final targetSeconds = widget.task!.durationMinutes * 60;
+      if (_seconds >= targetSeconds * 0.8) {
+        await taskService.updateTaskStatus(widget.task!.id, TaskStatus.completed);
+        
+        // Add bonus reward credits
+        bonusCredits = widget.task!.rewardMinutes * 60;
+        if (bonusCredits > 0) {
+          await storageService.addStudyTime(bonusCredits);
+        }
+      }
+    }
+
     if (!mounted) return;
 
     // Show success message
+    final earnedTotal = (_seconds + bonusCredits) ~/ 60;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          '¡Genial! Ganaste ${_formatTime()} de créditos',
+          widget.task != null && bonusCredits > 0
+              ? '¡Tarea cumplida! Ganaste $earnedTotal min de tiempo libre (incluye bono)'
+              : '¡Genial! Ganaste ${_formatTime()} de créditos',
           style: const TextStyle(fontSize: 16),
         ),
         backgroundColor: Colors.green,
-        duration: const Duration(seconds: 3),
+        duration: const Duration(seconds: 5),
       ),
     );
 
@@ -93,7 +121,7 @@ class _TimerPageState extends State<TimerPage> {
 
     await Future.delayed(const Duration(milliseconds: 500));
     if (mounted) {
-      context.pop();
+      context.pop(true); // Return completion status
     }
   }
 
@@ -152,8 +180,36 @@ class _TimerPageState extends State<TimerPage> {
       body: SafeArea(
         child: Column(
           children: [
+            // Task Info Header
+            if (widget.task != null)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Theme.of(context).colorScheme.primary),
+                ),
+                child: Column(
+                  children: [
+                    const Text('TRABAJANDO EN TAREA', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+                    const SizedBox(height: 4),
+                    Text(
+                      widget.task!.title,
+                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Objetivo: ${widget.task!.durationMinutes} min • Bonus: ${widget.task!.rewardMinutes} min',
+                      style: TextStyle(color: Colors.grey[700]),
+                    ),
+                  ],
+                ),
+              ),
+
             // Category Selector
-            if (_seconds == 0 && !_isRunning) ...[
+            if (_seconds == 0 && !_isRunning && widget.task == null) ...[
               Padding(
                 padding: const EdgeInsets.all(20),
                 child: Column(

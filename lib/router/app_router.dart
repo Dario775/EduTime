@@ -38,7 +38,10 @@ final router = GoRouter(
     GoRoute(
       path: '/timer',
       name: 'timer',
-      builder: (context, state) => const TimerPage(),
+      builder: (context, state) {
+        final task = state.extra as StudyTask?;
+        return TimerPage(task: task);
+      },
     ),
     GoRoute(
       path: '/profile',
