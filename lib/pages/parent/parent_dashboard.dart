@@ -362,7 +362,7 @@ class _ParentDashboardState extends State<ParentDashboard> {
   Widget _buildEmptyState() {
     return Container(
       padding: const EdgeInsets.all(32),
-      alignment: MainAxisAlignment.center,
+      alignment: Alignment.center,
       decoration: BoxDecoration(
         color: Colors.grey[100],
         borderRadius: BorderRadius.circular(16),
