@@ -54,8 +54,8 @@ class AuthService {
     if (usersJson == null) return [];
     
     try {
-      final List<dynamic> list = json.decode(usersJson);
-      return list.map((map) => AppUser.fromMap(map, map['uid'] as String? ?? 'unknown')).toList();
+      final List<dynamic> list = json.decode(usersJson) as List<dynamic>;
+      return list.map((map) => AppUser.fromMap(map as Map<String, dynamic>, map['uid'] as String? ?? 'unknown')).toList();
     } catch (e) {
       print('Error getting all users: $e');
       return [];

@@ -74,7 +74,7 @@ class StatsPage extends StatelessWidget {
                         ),
                         children: [
                           TextSpan(
-                            text: DateFormat('d MMM').format(day['date']),
+                            text: DateFormat('d MMM').format(day['date'] as DateTime),
                             style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.normal,
@@ -96,7 +96,7 @@ class StatsPage extends StatelessWidget {
                           return Padding(
                             padding: const EdgeInsets.only(top: 8.0),
                             child: Text(
-                              DateFormat('E').format(day['date'])[0],
+                              DateFormat('E').format(day['date'] as DateTime)[0],
                               style: const TextStyle(fontSize: 12),
                             ),
                           );

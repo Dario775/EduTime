@@ -16,8 +16,8 @@ class TaskService {
     if (tasksJson == null) return [];
     
     try {
-      final List<dynamic> list = json.decode(tasksJson);
-      return list.map((map) => StudyTask.fromMap(map, map['id'] as String? ?? 'unknown')).toList();
+      final List<dynamic> list = json.decode(tasksJson) as List<dynamic>;
+      return list.map((map) => StudyTask.fromMap(map as Map<String, dynamic>, map['id'] as String? ?? 'unknown')).toList();
     } catch (e) {
       print('Error getting all tasks: $e');
       return [];

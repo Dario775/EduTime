@@ -34,7 +34,7 @@ class StorageService {
     if (jsonString == null) return {};
     
     try {
-      final Map<String, dynamic> decoded = json.decode(jsonString);
+      final Map<String, dynamic> decoded = json.decode(jsonString) as Map<String, dynamic>;
       return decoded.map((key, value) => MapEntry(key, value as int));
     } catch (e) {
       return {};
