@@ -4,6 +4,7 @@ import 'services/storage_service.dart';
 import 'services/notification_service.dart';
 import 'services/auth_service.dart';
 import 'services/task_service.dart';
+import 'services/app_monitoring_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,6 +14,7 @@ void main() async {
   await notificationService.init();
   await authService.init();
   await taskService.init();
+  await appMonitoringService.init();
 
   
   // Schedule daily reminder if enabled
