@@ -6,6 +6,7 @@ import '../../services/task_service.dart';
 import '../../models/user_model.dart';
 import '../../models/task_model.dart';
 import 'create_task_page.dart';
+import 'child_activity_page.dart';
 
 class ParentDashboard extends StatefulWidget {
   const ParentDashboard({super.key});
@@ -210,6 +211,18 @@ class _ParentDashboardState extends State<ParentDashboard> {
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
+                                IconButton(
+                                  icon: const Icon(Icons.analytics, color: Colors.purple),
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => ChildActivityPage(child: child),
+                                      ),
+                                    );
+                                  },
+                                  tooltip: 'Ver Actividad',
+                                ),
                                 IconButton(
                                   icon: const Icon(Icons.add_task),
                                   onPressed: () => _showCreateTaskDialog(child),
