@@ -324,39 +324,82 @@ class _ChildDashboardState extends State<ChildDashboard> {
               return Card(
                 margin: const EdgeInsets.only(bottom: 12),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  leading: CircleAvatar(
-                    backgroundColor: isCompleted ? Colors.green[100] : Colors.blue[100],
-                    child: Icon(
-                      isCompleted ? Icons.check : Icons.book,
-                      color: isCompleted ? Colors.green : Colors.blue,
-                    ),
-                  ),
-                  title: Text(
-                    task.title,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      decoration: isCompleted ? TextDecoration.lineThrough : null,
-                    ),
-                  ),
-                  subtitle: Text('${task.durationMinutes} min • Recompensa: ${task.rewardMinutes} min'),
-                  trailing: isCompleted
-                      ? const Icon(Icons.verified, color: Colors.green)
-                      : ElevatedButton(
-                          onPressed: () async {
-                            final result = await context.push('/timer', extra: task);
-                            if (result == true) {
-                              _loadTasks();
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Theme.of(context).colorScheme.primary,
-                            foregroundColor: Colors.white,
-                            visualDensity: VisualDensity.compact,
-                          ),
-                          child: const Text('Comenzar'),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ListTile(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      leading: CircleAvatar(
+                        backgroundColor: isCompleted ? Colors.green[100] : Colors.blue[100],
+                        child: Icon(
+                          isCompleted ? Icons.check : Icons.book,
+                          color: isCompleted ? Colors.green : Colors.blue,
                         ),
+                      ),
+                      title: Text(
+                        task.title,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          decoration: isCompleted ? TextDecoration.lineThrough : null,
+                        ),
+                      ),
+                      subtitle: Text('${task.durationMinutes} min • Recompensa: ${task.rewardMinutes} min'),
+                      trailing: isCompleted
+                          ? const Icon(Icons.verified, color: Colors.green)
+                          : ElevatedButton(
+                              onPressed: () async {
+                                final result = await context.push('/timer', extra: task);
+                                if (result == true) {
+                                  _loadTasks();
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Theme.of(context).colorScheme.primary,
+                                foregroundColor: Colors.white,
+                                visualDensity: VisualDensity.compact,
+                              ),
+                              child: const Text('Comenzar'),
+                            ),
+                    ),
+                    
+                    // Allowed Apps Section
+                    if (task.allowedApps.isNotEmpty) ...[
+                      const Divider(height: 1),
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Apps permitidas:',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Wrap(
+                              spacing: 6,
+                              runSpacing: 6,
+                              children: task.allowedApps.map((packageName) {
+                                final appName = packageName.split('.').last;
+                                return Chip(
+                                  label: Text(
+                                    appName,
+                                    style: const TextStyle(fontSize: 11),
+                                  ),
+                                  avatar: const Icon(Icons.apps, size: 16),
+                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  visualDensity: VisualDensity.compact,
+                                );
+                              }).toList(),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               );
             },

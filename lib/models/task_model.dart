@@ -15,6 +15,7 @@ class StudyTask {
   final DateTime createdAt;
   final DateTime? completedAt;
   final int rewardMinutes; // Free time rewarded after completion
+  final List<String> allowedApps; // Package names of allowed apps
 
   StudyTask({
     required this.id,
@@ -27,6 +28,7 @@ class StudyTask {
     required this.createdAt,
     this.completedAt,
     this.rewardMinutes = 0,
+    this.allowedApps = const [],
   });
 
   factory StudyTask.fromMap(Map<String, dynamic> map, String id) {
@@ -45,6 +47,7 @@ class StudyTask {
           ? DateTime.parse(map['completedAt'] as String)
           : null,
       rewardMinutes: map['rewardMinutes'] as int? ?? 0,
+      allowedApps: (map['allowedApps'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
     );
   }
 
@@ -59,6 +62,7 @@ class StudyTask {
       'createdAt': createdAt.toIso8601String(),
       'completedAt': completedAt?.toIso8601String(),
       'rewardMinutes': rewardMinutes,
+      'allowedApps': allowedApps,
     };
   }
 
@@ -77,6 +81,7 @@ class StudyTask {
       createdAt: createdAt,
       completedAt: completedAt ?? this.completedAt,
       rewardMinutes: rewardMinutes,
+      allowedApps: allowedApps,
     );
   }
 }

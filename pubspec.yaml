@@ -18,6 +18,7 @@ dependencies:
 
   # Notifications
   flutter_local_notifications: ^18.0.1
+  device_apps: ^2.2.0  # Para listar apps instaladas
 
   # Charts
   fl_chart: ^0.69.2

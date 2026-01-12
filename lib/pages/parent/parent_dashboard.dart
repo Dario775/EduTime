@@ -5,6 +5,7 @@ import '../../services/auth_service.dart';
 import '../../services/task_service.dart';
 import '../../models/user_model.dart';
 import '../../models/task_model.dart';
+import 'create_task_page.dart';
 
 class ParentDashboard extends StatefulWidget {
   const ParentDashboard({super.key});
@@ -231,6 +232,21 @@ class _ParentDashboardState extends State<ParentDashboard> {
   }
 
   Future<void> _showCreateTaskDialog(AppUser child) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CreateTaskPage(child: child),
+      ),
+    );
+    
+    if (result == true && mounted) {
+      setState(() {}); // Refresh to show new task
+    }
+  }
+
+  // Old dialog method replaced with CreateTaskPage navigation
+  /*
+  Future<void> _showCreateTaskDialog_OLD(AppUser child) async {
     final titleController = TextEditingController();
     final durationController = TextEditingController();
     final rewardController = TextEditingController();
