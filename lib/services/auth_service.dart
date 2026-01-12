@@ -198,8 +198,26 @@ class AuthService {
 
   // --- Parenting / Linking Logic (Mock) ---
   
-  // In-memory storage for pairing codes (Code -> UserID)
-  final Map<String, String> _activeConnectionCodes = {};
+  static const String _keyConnectionCodes = 'connection_codes';
+
+  // Get active connection codes from storage
+  Future<Map<String, String>> _getConnectionCodes() async {
+    final codesJson = _prefs.getString(_keyConnectionCodes);
+    if (codesJson == null) return {};
+    
+    try {
+      final Map<String, dynamic> decoded = json.decode(codesJson) as Map<String, dynamic>;
+      return decoded.map((key, value) => MapEntry(key, value as String));
+    } catch (e) {
+      print('Error getting connection codes: $e');
+      return {};
+    }
+  }
+
+  // Save connection codes to storage
+  Future<void> _saveConnectionCodes(Map<String, String> codes) async {
+    await _prefs.setString(_keyConnectionCodes, json.encode(codes));
+  }
 
   // Generate a 6-digit code for the current user (Parent)
   Future<String> generateConnectionCode() async {
@@ -209,8 +227,10 @@ class AuthService {
     // Generate simple 6-digit code
     final code = (100000 + DateTime.now().millisecondsSinceEpoch % 900000).toString();
     
-    // Store in memory (valid for this session)
-    _activeConnectionCodes[code] = user.uid;
+    // Store in SharedPreferences
+    final codes = await _getConnectionCodes();
+    codes[code] = user.uid;
+    await _saveConnectionCodes(codes);
     
     return code;
   }
@@ -218,7 +238,8 @@ class AuthService {
   // Connect using a code (Child enters Parent's code)
   Future<String?> connectWithCode(String code) async {
     try {
-      final parentId = _activeConnectionCodes[code];
+      final codes = await _getConnectionCodes();
+      final parentId = codes[code];
       
       if (parentId == null) {
         return 'Código inválido o expirado';
@@ -231,8 +252,8 @@ class AuthService {
       final error = await linkChildToParent(childId: childId, parentId: parentId);
       
       if (error == null) {
-        // Consume code (optional, keep it if multiple children need to join)
-        // _activeConnectionCodes.remove(code); 
+        // Keep code for multiple children to join
+        // To remove after use: codes.remove(code); await _saveConnectionCodes(codes);
       }
       
       return error;
